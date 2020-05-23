@@ -1,0 +1,108 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+//define functions here
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('MM/dd/yyyy h:mm:ss a')
+    return formattedDate
+}
+
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    signingConfigs {
+        config {
+            keyAlias 'key0'
+            storeFile file("BUILDVARIANTS.jks")
+            keyPassword 'BUILDVARIANTS'
+            storePassword 'BUILDVARIANTS'
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.dev.buildvariants"
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+//        signingConfig signingConfigs.config
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+    buildTypes {
+
+        def BASE_URL_QA = "\"http://buildvariant-api-dev-QA.com/ \""
+        def BASE_URL_UAT = "\"http://buildvariant-api-dev-UAT.com/ \""
+        def BASE_URL_LIVE = "\"httpL//buildvariant-api-dev-LIVE.com/\""
+        def BASE_URL_PROD = "\"httpL//buildvariant-api-dev-PROD.com/\""
+
+
+        debug {
+            versionNameSuffix "-development " + "-build " + getDate()
+//            resValue "string", "app_name", "Debug BuildVariantApp"
+            applicationIdSuffix ".debug"
+            buildConfigField "String", "BASE_URL", BASE_URL_QA
+            buildConfigField "String", "PUBLIC_KEY", "\"Hkdflkfdjflk-JKjfskdfjdlkfj-JFKJDSFHKDJ-Hutyieuty7477 \""
+            buildConfigField "boolean", "IS_PRODUCTION", "false"
+            debuggable true
+        }
+
+
+        release_uat {
+            versionNameSuffix "-release (UAT)" + "-Build " + getDate()
+//            resValue "string", "app_name", "UAT BuildVariantApp"
+            applicationIdSuffix ".uat"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", BASE_URL_UAT
+            buildConfigField "String", "PUBLIC_KEY", "\"Hkdflkfdjflk-JKjfskdfjdlkfj-JFKJDSFHKDJ-Hutyieuty7477 \""
+            signingConfig signingConfigs.config //signing should be required to debug
+            debuggable true
+        }
+
+        release_live {
+
+            versionNameSuffix "-release (Live)" + "-Build " + getDate()
+//            resValue "string", "app_name", "Live BuildVariantApp"
+            applicationIdSuffix ".live"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", BASE_URL_LIVE
+            buildConfigField "String", "PUBLIC_KEY", "\"Hkdflkfdjflk-JKjfskdfjdlkfj-JFKJDSFHKDJ-Hutyieuty7477 \""
+            debuggable false
+
+
+        }
+
+
+        release {
+            minifyEnabled true
+            buildConfigField "boolean", "IS_PRODUCTION", "true"
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", BASE_URL_PROD
+            buildConfigField("String", "PUBLIC_KEY", "\"Hkdflkfdjflk-JKjfskdfjdlkfj-JFKJDSFHKDJ-Hutyieuty7477 \"")
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.buildConfigField "String", "APP_VERSION", "\"" + android.defaultConfig.versionName + "\""
+        variant.buildConfigField "String", "BUILD_DATE", "\"" + getDate() + "\""
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
